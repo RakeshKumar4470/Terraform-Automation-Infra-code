@@ -1,0 +1,14 @@
+ jobs:
+  - job: terraforminint
+    displayName: terraform Init
+    steps:        
+      - task: TerraformTask@5
+        inputs:
+          provider: 'azurerm'
+          command: 'init'
+          workingDirectory: '$(System.DefaultWorkingDirectory)/todoapp_infra'
+          backendServiceArm: 'CodeNova_Connection'
+          backendAzureRmResourceGroupName: 'rg'
+          backendAzureRmStorageAccountName: 'rakshafurr1'
+          backendAzureRmContainerName: 'pipeline'
+          backendAzureRmKey: 'stages.tfstate'

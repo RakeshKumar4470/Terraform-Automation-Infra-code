@@ -1,0 +1,63 @@
+trigger:
+- main
+pool:
+ AITODO-Agent
+
+stages: 
+  - stage: Build
+    displayName: Build
+    jobs: 
+      - job: terraforminstall
+        displayName: Terraform Install
+        steps:
+          - task: TerraformInstaller@1
+            inputs:
+              terraformVersion: 'latest'
+      - job: 
+        displayName: Terraform Init
+        steps:
+          - task: TerraformTask@5
+            inputs:
+              provider: 'azurerm'
+              command: 'init'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/todoapp_infra'
+              backendServiceArm: 'CodeNova_Connection'
+              backendAzureRmResourceGroupName: 'rg'
+              backendAzureRmStorageAccountName: 'rakshafurr1'
+              backendAzureRmContainerName: 'pipeline'
+              backendAzureRmKey: 'dev.terraform.statefile'
+      - job: 
+        displayName: Terraform Validate
+        pool: server
+        steps: 
+          - task: ManualValidation@1
+            inputs:
+              notifyUsers: 'Rakesh Kumar'
+              approvers: 'rk42942@gmail.com'
+              instructions: 'Kindly check and approve'
+  - stage: Deploy
+    displayName: Deploy
+    jobs:
+      - job: terraforminit
+        displayName: Terraform Init
+        steps:
+          - task: TerraformTask@5
+            inputs:
+              provider: 'azurerm'
+              command: 'init'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/todoapp_infra'
+              backendServiceArm: 'CodeNova_Connection'
+              backendAzureRmResourceGroupName: 'rg'
+              backendAzureRmStorageAccountName: 'rakshafurr1'
+              backendAzureRmContainerName: 'pipeline'
+              backendAzureRmKey: 'dev.terraform.statefile'
+      - job: 
+        displayName: Terraform Apply
+        dependsOn: terraforminit
+        steps:
+          - task: TerraformTask@5
+            inputs:
+              provider: 'azurerm'
+              command: 'apply'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/todoapp_infra'
+              environmentServiceNameAzureRM: 'CodeNova_Connection'
