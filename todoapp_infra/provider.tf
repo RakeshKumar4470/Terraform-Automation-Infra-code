@@ -10,7 +10,7 @@ terraform {
     storage_Account_name = "rakshafurr1"
     location             = "eastus"
     container            = "pipeline"
-    key                  = " terraform.tfstate"
+    key                  = "vm-dev.terraform.tfstate"
   }
 }
 

@@ -6,12 +6,12 @@ module "resource_group" {
 
 module "resource_group1" {
   source                  = "../modules/azurerm_resource_group"
-  resource_group_name     = "rg-tirju"
+  resource_group_name     = "rg-NCS"
   resource_group_location = "canada central"
 }
 module "resource_group2" {
   source                  = "../modules/azurerm_resource_group"
-  resource_group_name     = "rg-birju"
+  resource_group_name     = "rg-ASR"
   resource_group_location = "canada central"
 }
 
@@ -29,9 +29,9 @@ module "virtual_network1" {
   depends_on = [module.resource_group]
   source     = "../modules/azurerm_virtual_network"
 
-  virtual_network_name     = "vnet-tondu"
+  virtual_network_name     = "vnet-NCS"
   virtual_network_location = "canada central"
-  resource_group_name      = "Rjil-todoapp"
+  resource_group_name      = "rg-NCS"
   address_space            = ["10.0.0.0/16"]
 }
 
@@ -39,9 +39,9 @@ module "virtual_network2" {
   depends_on = [module.resource_group]
   source     = "../modules/azurerm_virtual_network"
 
-  virtual_network_name     = "vnet-dhondhu"
+  virtual_network_name     = "vnet-ASR"
   virtual_network_location = "canada central"
-  resource_group_name      = "Rjil-todoapp"
+  resource_group_name      = "rg-ASR"
   address_space            = ["10.0.0.0/16"]
 }
 
@@ -55,22 +55,22 @@ module "frontend_subnet" {
   address_prefixes     = ["10.0.1.0/24"]
 }
 
-module "birju_subnet" {
-  depends_on = [module.virtual_network]
+module "ncs_subnet" {
+  depends_on = [module.virtual_network1]
   source     = "../modules/azurerm_subnet"
 
-  resource_group_name  = "rg-birju"
-  virtual_network_name = "vnet-birju"
-  subnet_name          = "birju-subnet"
+  resource_group_name  = "rg-NCS"
+  virtual_network_name = "vnet-NCS"
+  subnet_name          = "subnet-NCS"
   address_prefixes     = ["10.0.60.0/24"]
 }
-module "tirju_subnet" {
-  depends_on = [module.virtual_network]
+module "asr_subnet" {
+  depends_on = [module.virtual_network2]
   source     = "../modules/azurerm_subnet"
 
-  resource_group_name  = "rg-tirju"
-  virtual_network_name = "vnet-ttirju"
-  subnet_name          = "tirju-subnet"
+  resource_group_name  = "rg-ASR"
+  virtual_network_name = "vnet-ASR"
+  subnet_name          = "subnet-ASR"
   address_prefixes     = ["10.0.7.0/24"]
 }
 
@@ -110,7 +110,7 @@ module "frontend_vm" {
   frontend_ip_name     = "pip-todoapp-frontend"
   vnet_name            = "vnet-todoapp"
   frontend_subnet_name = "frontend-subnet"
-  key_vault_name       = "vmsecret"
+  key_vault_name       = "rjil-vmsecret"
   username_secret_name = "vm-username"
   password_secret_name = "vm-password"
 }
@@ -163,7 +163,7 @@ module "frontend_vm" {
 
 module "key_vault" {
   source              = "../modules/azurerm_key_vault"
-  key_vault_name      = "vmsecret"
+  key_vault_name      = "rjil-vmsecret"
   location            = "canada central"
   resource_group_name = "Rjil-todoapp"
 }
@@ -171,7 +171,7 @@ module "key_vault" {
 module "vm_password" {
   source              = "../modules/azurerm_key_vault_secret"
   depends_on          = [module.key_vault]
-  key_vault_name      = "vmsecret"
+  key_vault_name      = "rjil-vmsecret"
   resource_group_name = "Rjil-todoapp"
   secret_name         = "vm-password"
   secret_value        = "P@ssw01rd@123"
@@ -180,7 +180,7 @@ module "vm_password" {
 module "vm_username" {
   source              = "../modules/azurerm_key_vault_secret"
   depends_on          = [module.key_vault]
-  key_vault_name      = "vmsecret"
+  key_vault_name      = "rjil-vmsecret"
   resource_group_name = "Rjil-todoapp"
   secret_name         = "vm-username"
   secret_value        = "devopsadmin"
